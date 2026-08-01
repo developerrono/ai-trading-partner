@@ -40,7 +40,7 @@ export const Route = createFileRoute("/journal")({
       },
     ],
   }),
-  component: Journal;
+  component: Journal,
 });
 
 function Journal() {
