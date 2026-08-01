@@ -44,7 +44,7 @@ export const Route = createFileRoute("/journal")({
 });
 
 function Journal() {
-  const [selectedId, setSelectedId] = useState(trades[0].id);
+  const [selectedId, setSelectedId] = useState(trades[0]!.id);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
 
@@ -60,7 +60,7 @@ function Journal() {
     [query, filter],
   );
 
-  const selected = trades.find((t) => t.id === selectedId) ?? trades[0];
+  const selected = trades.find((t) => t.id === selectedId) ?? trades[0]!;
 
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">

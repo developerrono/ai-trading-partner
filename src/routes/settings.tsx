@@ -48,7 +48,7 @@ function Row({
         <p className="text-sm">{title}</p>
         <p className="text-xs text-muted-foreground">{description}</p>
       </div>
-      <Switch defaultChecked={defaultChecked} />
+      <Switch defaultChecked={defaultChecked ?? false} />
     </div>
   );
 }
