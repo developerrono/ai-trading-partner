@@ -4,6 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -15,6 +17,9 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+
+const PUBLIC_ROUTES = ["/login", "/register"];
 
 function NotFoundComponent() {
   return (
@@ -133,20 +138,67 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <TopBar />
-            <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-              {/* Required: nested routes render here. */}
-              <Outlet />
-            </main>
-          </div>
-        </div>
-        <Toaster />
-      </SidebarProvider>
+      <AuthProvider>
+        <AuthAwareShell />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
 
+/**
+ * Splits into two layouts:
+ * - public routes (/login, /register): no sidebar, no auth guard
+ * - everything else: sidebar + topbar, and redirects to /login if unauthenticated
+ */
+function AuthAwareShell() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (!isPublicRoute && !isAuthenticated) {
+      navigate({ to: "/login" });
+    }
+    if (isPublicRoute && isAuthenticated) {
+      navigate({ to: "/" });
+    }
+  }, [isLoading, isPublicRoute, isAuthenticated, navigate]);
+
+  if (isPublicRoute) {
+    return (
+      <>
+        <Outlet />
+        <Toaster />
+      </>
+    );
+  }
+
+  // Protected route: block render until we know the auth state, so pages
+  // never flash their content before the redirect-to-login effect fires.
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        <AppSidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TopBar />
+          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            {/* Required: nested routes render here. */}
+            <Outlet />
+          </main>
+        </div>
+      </div>
+      <Toaster />
+    </SidebarProvider>
+  );
+}

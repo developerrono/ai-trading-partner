@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Bell, Search } from "lucide-react";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -13,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { alerts } from "@/lib/mock-data";
 import { StatusDot } from "@/components/common/StatusDot";
+import { useAuth } from "@/contexts/AuthContext";
 
 function useClock() {
   const [now, setNow] = useState<Date | null>(null);
@@ -24,9 +26,27 @@ function useClock() {
   return now;
 }
 
+function initials(name: string): string {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "?"
+  );
+}
+
 export function TopBar() {
   const now = useClock();
   const unread = alerts.filter((a) => a.unread).length;
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleSignOut() {
+    logout();
+    navigate({ to: "/login" });
+  }
 
   return (
     <header className="sticky top-0 z-30 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
@@ -86,10 +106,12 @@ export function TopBar() {
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-3 rounded-lg border border-border bg-surface px-2 py-1.5 text-left transition-colors hover:bg-surface-2">
             <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-secondary text-[11px] font-semibold">
-              RN
+              {initials(user?.display_name ?? "")}
             </span>
             <span className="hidden min-w-0 sm:block">
-              <span className="block truncate text-xs font-medium">Rono</span>
+              <span className="block truncate text-xs font-medium">
+                {user?.display_name ?? "..."}
+              </span>
               <span className="block truncate text-[10px] text-muted-foreground">Solo trader</span>
             </span>
           </DropdownMenuTrigger>
@@ -100,7 +122,7 @@ export function TopBar() {
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Preferences</DropdownMenuItem>
-            <DropdownMenuItem>Sign out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

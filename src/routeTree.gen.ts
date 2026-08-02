@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AiPartnerRouteImport } from './routes/ai-partner'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as JournalRouteImport } from './routes/journal'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketRouteImport } from './routes/market'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SettingsRouteImport } from './routes/settings'
 
@@ -37,9 +39,19 @@ const JournalRoute = JournalRouteImport.update({
   path: '/journal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketRoute = MarketRouteImport.update({
   id: '/market',
   path: '/market',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -58,7 +70,9 @@ export interface FileRoutesByFullPath {
   '/ai-partner': typeof AiPartnerRoute
   '/alerts': typeof AlertsRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/market': typeof MarketRoute
+  '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
 }
@@ -67,7 +81,9 @@ export interface FileRoutesByTo {
   '/ai-partner': typeof AiPartnerRoute
   '/alerts': typeof AlertsRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/market': typeof MarketRoute
+  '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
 }
@@ -77,7 +93,9 @@ export interface FileRoutesById {
   '/ai-partner': typeof AiPartnerRoute
   '/alerts': typeof AlertsRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/market': typeof MarketRoute
+  '/register': typeof RegisterRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
 }
@@ -88,7 +106,9 @@ export interface FileRouteTypes {
     | '/ai-partner'
     | '/alerts'
     | '/journal'
+    | '/login'
     | '/market'
+    | '/register'
     | '/reports'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
@@ -97,7 +117,9 @@ export interface FileRouteTypes {
     | '/ai-partner'
     | '/alerts'
     | '/journal'
+    | '/login'
     | '/market'
+    | '/register'
     | '/reports'
     | '/settings'
   id:
@@ -106,7 +128,9 @@ export interface FileRouteTypes {
     | '/ai-partner'
     | '/alerts'
     | '/journal'
+    | '/login'
     | '/market'
+    | '/register'
     | '/reports'
     | '/settings'
   fileRoutesById: FileRoutesById
@@ -116,7 +140,9 @@ export interface RootRouteChildren {
   AiPartnerRoute: typeof AiPartnerRoute
   AlertsRoute: typeof AlertsRoute
   JournalRoute: typeof JournalRoute
+  LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
+  RegisterRoute: typeof RegisterRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
 }
@@ -151,11 +177,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/market': {
       id: '/market'
       path: '/market'
       fullPath: '/market'
       preLoaderRoute: typeof MarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -180,10 +220,22 @@ const rootRouteChildren: RootRouteChildren = {
   AiPartnerRoute: AiPartnerRoute,
   AlertsRoute: AlertsRoute,
   JournalRoute: JournalRoute,
+  LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
+  RegisterRoute: RegisterRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
